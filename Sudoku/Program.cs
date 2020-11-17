@@ -1,48 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Sudoku
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            //Template: 0, 0, 0, 0, 0, 0
+            //Template: 0, 0, 0, 0, 0, 0, 0, 0, 0
             List<List<int>> BoardList = new List<List<int>>();
-            BoardList.Add(new List<int> { 0, 5, 0, 0, 0, 1 });
-            BoardList.Add(new List<int> { 0, 0, 4, 6, 0, 0 });
-            BoardList.Add(new List<int> { 4, 0, 0, 0, 5, 0 });
-            BoardList.Add(new List<int> { 1, 0, 0, 0, 0, 4 });
-            BoardList.Add(new List<int> { 0, 4, 3, 0, 0, 0 });
-            BoardList.Add(new List<int> { 0, 6, 0, 2, 4, 0 });
+            BoardList.Add(new List<int> { 0, 4, 0, 0, 7, 0, 0, 0, 0 });
+            BoardList.Add(new List<int> { 0, 0, 1, 0, 0, 8, 0, 7, 0 });
+            BoardList.Add(new List<int> { 0, 2, 7, 0, 3, 0, 5, 0, 9 });
+            BoardList.Add(new List<int> { 0, 0, 6, 0, 0, 0, 0, 0, 0 });
+            BoardList.Add(new List<int> { 7, 0, 0, 0, 6, 9, 0, 0, 0 });
+            BoardList.Add(new List<int> { 0, 0, 0, 0, 0, 4, 3, 0, 0 });
+            BoardList.Add(new List<int> { 3, 7, 0, 0, 1, 0, 0, 2, 0 });
+            BoardList.Add(new List<int> { 0, 8, 0, 4, 0, 2, 0, 6, 0 });
+            BoardList.Add(new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 5 });
 
             List<List<int>> Starts = new List<List<int>>();
             List<List<int>> Ends = new List<List<int>>();
             List<PossibleMembers> ValidMembers = new List<PossibleMembers>();
-            List<int> Members = new List<int> { 1, 2, 3, 4, 5, 6 };
+            List<int> Members = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             int StartIndex = 0;
             int EndIndex = 0;
-            int Steps = 0;
 
             for (int i = 0; i < BoardList[0].Count; i++)
             {
-                Steps++;
                 for (int j = 0; j < BoardList[0].Count; j++)
                 {
-                    Steps++;
-                    if (i % 2 == 0 && j % 3 == 0)
+                    if (i % 3 == 0 && j % 3 == 0)
                     {
-                        Steps++;
                         Starts.Add(new List<int>());
                         Starts[StartIndex].Add(i);
                         Starts[StartIndex].Add(j);
                         StartIndex++;
                     }
-                    
-                    else if (i % 2 == 1 && j % 3 == 2)
+
+                    else if (i % 3 == 2 && j % 3 == 2)
                     {
-                        Steps++;
                         Ends.Add(new List<int>());
                         Ends[EndIndex].Add(i);
                         Ends[EndIndex].Add(j);
@@ -53,7 +53,7 @@ namespace Sudoku
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            SolveSudoku(BoardList, ValidMembers, Members, Starts, Ends, Steps);
+            await SolveSudoku(BoardList, ValidMembers, Members, Starts, Ends);
             sw.Stop();
             Console.WriteLine($"Time taken: {sw.ElapsedMilliseconds}ms");
 
@@ -70,20 +70,16 @@ namespace Sudoku
             }
         }
 
-        private static void SolveSudoku(List<List<int>> BoardList, List<PossibleMembers> ValidMembers, List<int> Members, List<List<int>> Starts, List<List<int>> Ends, int Steps)
+        private static async Task SolveSudoku(List<List<int>> BoardList, List<PossibleMembers> ValidMembers, List<int> Members, List<List<int>> Starts, List<List<int>> Ends)
         {
-            Steps++;
             ValidMembers.Clear();
 
             for (int i = 0; i < BoardList[0].Count; i++)
             {
-                Steps++;
                 for (int j = 0; j < BoardList[0].Count; j++)
                 {
-                    Steps++;
                     if (BoardList[i][j] == 0)
                     {
-                        Steps++;
                         ValidMembers.Add(new PossibleMembers
                         {
                             x = i,
@@ -96,13 +92,10 @@ namespace Sudoku
 
             foreach (var Item in ValidMembers)
             {
-                Steps++;
                 foreach (var Member in Members)
                 {
-                    Steps++;
                     if (!BoardList[Item.x].Contains(Member))
                     {
-                        Steps++;
                         Item.members.Add(Member);
                     }
                 }
@@ -110,13 +103,10 @@ namespace Sudoku
 
             foreach (var Item in ValidMembers)
             {
-                Steps++;
                 foreach (var Member in Members)
                 {
-                    Steps++;
-                    for (int i = 0; i < 6; i++)
+                    for (int i = 0; i < 9; i++)
                     {
-                        Steps++;
                         if (BoardList[i][Item.y] == Member)
                         {
                             Item.members.Remove(Member);
@@ -127,18 +117,14 @@ namespace Sudoku
 
             for (int i = 0; i < Starts.Count; i++)
             {
-                Steps++;
                 List<PossibleMembers> TempList = new List<PossibleMembers>();
 
                 for (int j = Starts[i][0]; j < Ends[i][0] + 1; j++)
                 {
-                    Steps++;
                     for (int k = Starts[i][1]; k < Ends[i][1] + 1; k++)
                     {
-                        Steps++;
                         if (BoardList[j][k] == 0)
                         {
-                            Steps++;
                             TempList.Add(ValidMembers.Find(Item => Item.x == j && Item.y == k));
                         }
                     }
@@ -146,19 +132,14 @@ namespace Sudoku
 
                 foreach (var Temp in TempList)
                 {
-                    Steps++;
                     for (int j = Starts[i][0]; j < Ends[i][0] + 1; j++)
                     {
-                        Steps++;
                         for (int k = Starts[i][1]; k < Ends[i][1] + 1; k++)
                         {
-                            Steps++;
                             if (BoardList[j][k] != 0)
                             {
-                                Steps++;
                                 if (Temp.members.Contains(BoardList[j][k]))
                                 {
-                                    Steps++;
                                     Temp.members.Remove(BoardList[j][k]);
                                 }
                             }
@@ -167,30 +148,333 @@ namespace Sudoku
                 }
             }
 
+            List<List<PossibleMembers>> Colbased = new List<List<PossibleMembers>>();
+            List<List<PossibleMembers>> Rowbased = new List<List<PossibleMembers>>();
+            List<List<PossibleMembers>> GridBased = new List<List<PossibleMembers>>();
+
+            for (int i = 0; i < 9; i++)
+            {
+                Colbased.Add(new List<PossibleMembers>());
+                Rowbased.Add(new List<PossibleMembers>());
+
+                for (int j = 0; j < 9; j++)
+                {
+                    foreach (var ValidMember in ValidMembers)
+                    {
+                        if (ValidMember.x == i && ValidMember.y == j)
+                        {
+                            Colbased[i].Add(ValidMember);
+                        }
+
+                        if (ValidMember.x == j && ValidMember.y == i)
+                        {
+                            Rowbased[i].Add(ValidMember);
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < Starts.Count; i++)
+            {
+                GridBased.Add(new List<PossibleMembers>());
+
+                for (int j = Starts[i][0]; j < Ends[i][0] + 1; j++)
+                {
+                    for (int k = Starts[i][1]; k < Ends[i][1] + 1; k++)
+                    {
+                        foreach (var ValidMember in ValidMembers)
+                        {
+                            if (ValidMember.x == j && ValidMember.y == k)
+                            {
+                                GridBased[i].Add(ValidMember);
+                            }
+                        }
+                    }
+                }
+            }
+
+            List<int> AllMembers = new List<int>();
+
+            foreach (var MemberList in Colbased)
+            {
+                foreach (var Member in MemberList.ToArray())
+                {
+                    foreach (var member in Member.members)
+                    {
+                        AllMembers.Add(member);
+                    }
+                }
+
+                foreach (var Member in MemberList.ToArray())
+                {
+                    foreach (var member in Member.members.ToArray())
+                    {
+                        int count = AllMembers.Where(temp => temp.Equals(member))
+                                    .Select(temp => temp)
+                                    .Count();
+
+                        if (count == 1)
+                        {
+                            var find = Member.members.FindAll(item => item != member);
+
+                            foreach (var item in find)
+                            {
+                                Member.members.Remove(item);
+                            }
+                        }
+                    }
+                }
+
+                AllMembers.Clear();
+            }
+
+            foreach (var MemberList in Rowbased)
+            {
+                foreach (var Member in MemberList)
+                {
+                    foreach (var member in Member.members)
+                    {
+                        AllMembers.Add(member);
+                    }
+                }
+
+                foreach (var Member in MemberList.ToArray())
+                {
+                    foreach (var member in Member.members.ToArray())
+                    {
+                        int count = AllMembers.Where(temp => temp.Equals(member))
+                                    .Select(temp => temp)
+                                    .Count();
+
+                        if (count == 1)
+                        {
+                            var find = Member.members.FindAll(item => item != member);
+
+                            foreach (var item in find)
+                            {
+                                Member.members.Remove(item);
+                            }
+                        }
+                    }
+                }
+
+                AllMembers.Clear();
+            }
+
+            foreach (var MemberList in GridBased)
+            {
+                foreach (var Member in MemberList)
+                {
+                    foreach (var member in Member.members)
+                    {
+                        AllMembers.Add(member);
+                    }
+                }
+
+                foreach (var Member in MemberList.ToArray())
+                {
+                    foreach (var member in Member.members.ToArray())
+                    {
+                        int count = AllMembers.Where(temp => temp.Equals(member))
+                                    .Select(temp => temp)
+                                    .Count();
+
+                        if (count == 1)
+                        {
+                            var find = Member.members.FindAll(item => item != member);
+
+                            foreach (var item in find)
+                            {
+                                Member.members.Remove(item);
+                            }
+                        }
+                    }
+                }
+
+                AllMembers.Clear();
+            }
+
+            foreach (var item in ValidMembers)
+            {
+                if (item.members.Count == 1)
+                {
+                    BoardList[item.x][item.y] = item.members[0];
+                }
+            }
+
+            RemoveMembers(ValidMembers);
+
+            RemoveMemberList(Colbased);
+            RemoveMemberList(Rowbased);
+            RemoveMemberList(GridBased);
+
+            List<int> Matchingmembers = new List<int>();
+            List<PossibleMembers> Matching = new List<PossibleMembers>();
+
+            foreach (var MemberList in Colbased)
+            {
+                foreach (var Member in MemberList)
+                {
+                    if (Member.members.Count == 2)
+                    {
+                        foreach (var TwoCountMembers in MemberList)
+                        {
+                            int index = 0;
+
+                            if (TwoCountMembers.y != Member.y)
+                            {
+                                if (!Enumerable.SequenceEqual(Member.members, TwoCountMembers.members))
+                                {
+                                    index++;
+                                }
+
+                                if (index == 0)
+                                {
+                                    Matchingmembers.AddRange(Member.members);
+                                    Matching.Add(Member);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (Matching.Count == 2)
+                {
+                    foreach (var Member in MemberList)
+                    {
+                        if (!Matching.Contains(Member))
+                        {
+                            foreach (var member in Member.members.ToArray())
+                            {
+                                if (Matchingmembers.Contains(member))
+                                {
+                                    Member.members.Remove(member);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Matchingmembers.Clear();
+                Matching.Clear();
+            }
+
+            foreach (var MemberList in Rowbased)
+            {
+                foreach (var Member in MemberList)
+                {
+                    if (Member.members.Count == 2)
+                    {
+                        foreach (var TwoCountMembers in MemberList)
+                        {
+                            int index = 0;
+
+                            if (TwoCountMembers.x != Member.x)
+                            {
+                                if (!Enumerable.SequenceEqual(Member.members, TwoCountMembers.members))
+                                {
+                                    index++;
+                                }
+
+                                if (index == 0)
+                                {
+                                    Matchingmembers.AddRange(Member.members);
+                                    Matching.Add(Member);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (Matching.Count == 2)
+                {
+                    foreach (var Member in MemberList)
+                    {
+                        if (!Matching.Contains(Member))
+                        {
+                            foreach (var member in Member.members.ToArray())
+                            {
+                                if (Matchingmembers.Contains(member))
+                                {
+                                    Member.members.Remove(member);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Matchingmembers.Clear();
+                Matching.Clear();
+            }
+
+            foreach (var MemberList in GridBased)
+            {
+                foreach (var Member in MemberList)
+                {
+                    if (Member.members.Count == 2)
+                    {
+                        foreach (var TwoCountMembers in MemberList)
+                        {
+                            int index = 0;
+
+                            if (TwoCountMembers.y != Member.y && TwoCountMembers.x != Member.x)
+                            {
+                                if (!Enumerable.SequenceEqual(Member.members, TwoCountMembers.members))
+                                {
+                                    index++;
+                                }
+
+                                if (index == 0)
+                                {
+                                    Matchingmembers.AddRange(Member.members);
+                                    Matching.Add(Member);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (Matching.Count == 2)
+                {
+                    foreach (var Member in MemberList)
+                    {
+                        if (!Matching.Contains(Member))
+                        {
+                            foreach (var member in Member.members.ToArray())
+                            {
+                                if (Matchingmembers.Contains(member))
+                                {
+                                    Member.members.Remove(member);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Matchingmembers.Clear();
+                Matching.Clear();
+            }
+
             foreach (var Item in ValidMembers)
             {
-                Steps++;
                 if (Item.members.Count == 1)
                 {
-                    Steps++;
                     BoardList[Item.x][Item.y] = Item.members[0];
                 }
             }
 
             RemoveMembers(ValidMembers);
-            Steps++;
 
-            if (ValidMembers.Count > 0)
+            if (ValidMembers.Count == 10)
             {
-                Steps++;
-                SolveSudoku(BoardList, ValidMembers, Members, Starts, Ends, Steps);
+                Console.WriteLine("Done");
             }
 
-            else if (ValidMembers.Count == 0)
+            else if (ValidMembers.Count > 0)
             {
-                Console.WriteLine($"No of steps taken: {Steps}");
+                await SolveSudoku(BoardList, ValidMembers, Members, Starts, Ends);
             }
-           
+
         }
 
         private static void RemoveMembers(List<PossibleMembers> ValidMembers)
@@ -200,6 +484,20 @@ namespace Sudoku
                 if (Item.members.Count == 1)
                 {
                     ValidMembers.Remove(Item);
+                }
+            }
+        }
+
+        private static void RemoveMemberList(List<List<PossibleMembers>> ValidMembers)
+        {
+            foreach (var MemberList in ValidMembers)
+            {
+                foreach (var Member in MemberList.ToArray())
+                {
+                    if (Member.members.Count == 1)
+                    {
+                        MemberList.Remove(Member);
+                    }
                 }
             }
         }
